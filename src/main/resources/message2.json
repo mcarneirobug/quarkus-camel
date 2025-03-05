@@ -1,0 +1,5 @@
+{
+  "userId": "456",
+  "messageType": "error",
+  "payload": "Invalid JSON: \u0000"
+}

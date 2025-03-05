@@ -11,6 +11,10 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.camel.ProducerTemplate;
 import tech.poc.pojo.User;
+import tech.poc.routes.main.PartialFailureTrigger;
+import tech.poc.routes.main.TransientErrorTrigger;
+
+import java.util.logging.Logger;
 
 @Path("/messages")
 @ApplicationScoped
@@ -18,10 +22,14 @@ public class MessageController {
 
     private final ProducerTemplate producerTemplate;
     private final ObjectMapper objectMapper;
+    private final PartialFailureTrigger partialFailureTrigger;
+    private final TransientErrorTrigger transientErrorTrigger;
 
-    public MessageController(ProducerTemplate producerTemplate, ObjectMapper objectMapper) {
+    public MessageController(ProducerTemplate producerTemplate, ObjectMapper objectMapper, PartialFailureTrigger partialFailureTrigger, TransientErrorTrigger transientErrorTrigger) {
         this.producerTemplate = producerTemplate;
         this.objectMapper = objectMapper;
+        this.partialFailureTrigger = partialFailureTrigger;
+        this.transientErrorTrigger = transientErrorTrigger;
     }
 
     @POST
@@ -41,10 +49,38 @@ public class MessageController {
     }
 
     @POST
+    @Path("/failRoutingAPI")
+    public String failRoutingAPI() {
+        producerTemplate.sendBody("direct:handleTransientError", "Simulated Failure");
+        return "Routing API failure simulated!";
+    }
+
+    @POST
+    @Path("/retryFailed")
+    public String retryFailedMessages() {
+        producerTemplate.sendBody("timer:reprocess", "Trigger manual retry");
+        return "Retry triggered!";
+    }
+
+    @POST
     @Path("/error")
     public Response triggerErrorRoute() {
         producerTemplate.sendBody("direct:handleErrors", "Testing error.");
         return Response.ok("Error simulated.")
                 .build();
+    }
+
+    @POST
+    @Path("/partialRoutingAPI")
+    public String partialFailRoutingAPI() {
+        partialFailureTrigger.triggerRoute();
+        return "Routing API partial failure simulated!";
+    }
+
+    @POST
+    @Path("/failTransientAPI")
+    public String failTransientAPI() {
+        transientErrorTrigger.triggerRoute();
+        return "Routing API transient failure simulated!";
     }
 }
