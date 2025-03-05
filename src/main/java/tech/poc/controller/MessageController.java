@@ -11,6 +11,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.camel.ProducerTemplate;
 import tech.poc.pojo.User;
+import tech.poc.routes.main.DirectResendTrigger;
 import tech.poc.routes.main.PartialFailureTrigger;
 import tech.poc.routes.main.TransientErrorTrigger;
 
@@ -24,12 +25,14 @@ public class MessageController {
     private final ObjectMapper objectMapper;
     private final PartialFailureTrigger partialFailureTrigger;
     private final TransientErrorTrigger transientErrorTrigger;
+    private final DirectResendTrigger directResendTrigger;
 
-    public MessageController(ProducerTemplate producerTemplate, ObjectMapper objectMapper, PartialFailureTrigger partialFailureTrigger, TransientErrorTrigger transientErrorTrigger) {
+    public MessageController(ProducerTemplate producerTemplate, ObjectMapper objectMapper, PartialFailureTrigger partialFailureTrigger, TransientErrorTrigger transientErrorTrigger, DirectResendTrigger directResendTrigger) {
         this.producerTemplate = producerTemplate;
         this.objectMapper = objectMapper;
         this.partialFailureTrigger = partialFailureTrigger;
         this.transientErrorTrigger = transientErrorTrigger;
+        this.directResendTrigger = directResendTrigger;
     }
 
     @POST
@@ -82,5 +85,12 @@ public class MessageController {
     public String failTransientAPI() {
         transientErrorTrigger.triggerRoute();
         return "Routing API transient failure simulated!";
+    }
+
+    @POST
+    @Path("/failDirectResendAPI")
+    public String failDirectResendAPI() {
+        directResendTrigger.sendMessage("Test Message");
+        return "Routing API redirect resend failure simulated!";
     }
 }
