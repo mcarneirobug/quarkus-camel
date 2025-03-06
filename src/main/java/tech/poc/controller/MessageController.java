@@ -13,9 +13,8 @@ import org.apache.camel.ProducerTemplate;
 import tech.poc.pojo.User;
 import tech.poc.routes.main.DirectResendTrigger;
 import tech.poc.routes.main.PartialFailureTrigger;
+import tech.poc.routes.main.SimpleRetryTrigger;
 import tech.poc.routes.main.TransientErrorTrigger;
-
-import java.util.logging.Logger;
 
 @Path("/messages")
 @ApplicationScoped
@@ -26,13 +25,15 @@ public class MessageController {
     private final PartialFailureTrigger partialFailureTrigger;
     private final TransientErrorTrigger transientErrorTrigger;
     private final DirectResendTrigger directResendTrigger;
+    private final SimpleRetryTrigger simpleRetryTrigger;
 
-    public MessageController(ProducerTemplate producerTemplate, ObjectMapper objectMapper, PartialFailureTrigger partialFailureTrigger, TransientErrorTrigger transientErrorTrigger, DirectResendTrigger directResendTrigger) {
+    public MessageController(ProducerTemplate producerTemplate, ObjectMapper objectMapper, PartialFailureTrigger partialFailureTrigger, TransientErrorTrigger transientErrorTrigger, DirectResendTrigger directResendTrigger, SimpleRetryTrigger simpleRetryTrigger) {
         this.producerTemplate = producerTemplate;
         this.objectMapper = objectMapper;
         this.partialFailureTrigger = partialFailureTrigger;
         this.transientErrorTrigger = transientErrorTrigger;
         this.directResendTrigger = directResendTrigger;
+        this.simpleRetryTrigger = simpleRetryTrigger;
     }
 
     @POST
@@ -69,8 +70,7 @@ public class MessageController {
     @Path("/error")
     public Response triggerErrorRoute() {
         producerTemplate.sendBody("direct:handleErrors", "Testing error.");
-        return Response.ok("Error simulated.")
-                .build();
+        return Response.ok("Error simulated.").build();
     }
 
     @POST
@@ -92,5 +92,12 @@ public class MessageController {
     public String failDirectResendAPI() {
         directResendTrigger.sendMessage("Test Message");
         return "Routing API redirect resend failure simulated!";
+    }
+
+    @POST
+    @Path("/simpleResendAPI")
+    public String simpleResendAPI() {
+        simpleRetryTrigger.triggerRoute();
+        return "Routing API simple resend failure simulated!";
     }
 }

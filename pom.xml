@@ -88,10 +88,15 @@
             <artifactId>camel-quarkus-bean</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkiverse.artemis</groupId>
-            <artifactId>quarkus-artemis-jms</artifactId>
-            <version>3.6.0</version>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-client</artifactId>
+            <version>6.1.5</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.quarkiverse.artemis</groupId>-->
+<!--            <artifactId>quarkus-artemis-jms</artifactId>-->
+<!--            <version>3.6.0</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>
